@@ -81,3 +81,22 @@ jobs:
       run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+  deploy:
+      needs: build-container-image
+      runs-on: ubuntu-latest
+      steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          repository: galsolom/argo
+          ref: test-template
+      - name: edit file using yq
+        id: yamlUpdate
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq -i 'argo/services/values/app.yaml' 'image.tag' ${{ steps.meta.outputs.tags }}
+      - name: read file using yq
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq  'argo/services/values/app.yaml' 'image.tag'
+        
