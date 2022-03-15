@@ -10,77 +10,78 @@ on:
     branches: [ main ]
 
 jobs:
-  # test:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v2
+  
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-  #   - name: Set up Python 3.9
-  #     uses: actions/setup-python@v2
-  #     with:
-  #       python-version: "3.9"
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.9"
 
-  #   - name: Install dependencies
-  #     run: |
-  #       python -m pip install --upgrade pip
-  #       pip install flake8 pytest requests
-  #       pip install -r requirements.txt
-  #   - name: Lint with flake8
-  #     run: |
-  #       # stop the build if there are Python syntax errors or undefined names#
-  #       flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-  #       # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-  #       flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-  #   - name: Test with pytest
-  #     run: |
-  #       pytest test_main.py
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest requests
+        pip install -r requirements.txt
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names#
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Test with pytest
+      run: |
+        pytest test_main.py
 
-  # build-container-image:
-  #   needs: test
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: Checkout
-  #     uses: actions/checkout@v2
+  build-container-image:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
 
-  #   - name: Set up Docker Buildx
-  #     uses: docker/setup-buildx-action@v1
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
 
-  #   - name: Cache Docker layers
-  #     uses: actions/cache@v2
-  #     with:
-  #       path: /tmp/.buildx-cache
-  #       key: ${{ runner.os }}-buildx-${{ github.sha }}
-  #       restore-keys: |
-  #         ${{ runner.os }}-buildx-
-  #   - name: Login to DockerHub
-  #     uses: docker/login-action@v1
-  #     with:
-  #         username: ${{ secrets.DOCKER_USERNAME }}
-  #         password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Cache Docker layers
+      uses: actions/cache@v2
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-
+    - name: Login to DockerHub
+      uses: docker/login-action@v1
+      with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-  #   - name: Extract metadata (tags, labels) for container image
-  #     id: meta
-  #     uses: docker/metadata-action@v3
-  #     with:
-  #       images: galsolom/app
-  #       tags: | 
-  #         type=sha,format=long,prefix={{branch}}-
+    - name: Extract metadata (tags, labels) for container image
+      id: meta
+      uses: docker/metadata-action@v3
+      with:
+        images: galsolom/app
+        tags: | 
+          type=sha,format=long,prefix={{branch}}-
 
-  #   - name: Build and push
-  #     uses: docker/build-push-action@v2
-  #     with:
-  #       context: .
-  #       push: false
-  #       tags: ${{ steps.meta.outputs.tags }}
-  #       labels: ${{ steps.meta.outputs.labels }}
-  #       cache-from: type=local,src=/tmp/.buildx-cache
-  #       cache-to: type=local,dest=/tmp/.buildx-cache-new
+    - name: Build and push
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        push: false
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-to: type=local,dest=/tmp/.buildx-cache-new
 
-  #   - name: Move cache
-  #     run: |
-  #         rm -rf /tmp/.buildx-cache
-  #         mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+    - name: Move cache
+      run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
   deploy:
       runs-on: ubuntu-latest
       steps:
@@ -100,7 +101,7 @@ jobs:
       
       - name: create var
         run: |
-          appversion=$(echo ${{ steps.meta.outputs.tags }} | sed 's/.*://' -)
+          export appversion=$(echo ${{ steps.meta.outputs.tags }} | sed 's/.*://' -)
           
       - name: edit file using yq
         id: yamlUpdate
