@@ -10,7 +10,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -36,7 +36,8 @@ jobs:
       run: |
         pytest test_main.py
 
-  build-container:
+  build-container-image:
+    needs: test
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
