@@ -122,7 +122,7 @@ jobs:
         run: |
           git config --local user.email "actionbot@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git commit add argo/services/values/app.yaml
+          git add argo/services/values/app.yaml
           git commit -m "updated app version"
       - name: Push changes
         uses: ad-m/github-push-action@master
