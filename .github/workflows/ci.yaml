@@ -107,7 +107,7 @@ jobs:
         id: yamlUpdate
         uses: mikefarah/yq@master
         with:
-          cmd: yq -i '.image.tag = $appversion' argo/services/values/app.yaml
+          cmd: yq -i '.image.tag = "$appversion"' argo/services/values/app.yaml
           
       - name: read file
         run: |
