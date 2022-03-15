@@ -98,13 +98,16 @@ jobs:
           repository: galsolom/argo
           ref: test-template
       
+      - name: create var
+        run: |
+          appversion=$(echo ${{ steps.meta.outputs.tags }} | sed 's/.*://' -)
+          
       - name: edit file using yq
         id: yamlUpdate
         uses: mikefarah/yq@master
         with:
-          cmd: yq -i '.image.tag = "${{ steps.meta.outputs.tags }}"' argo/services/values/app.yaml
+          cmd: yq -i '.image.tag = "$appversion"' argo/services/values/app.yaml
           
       - name: read file
         run: |
           cat argo/services/values/app.yaml
-        
