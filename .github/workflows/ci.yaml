@@ -95,7 +95,6 @@ jobs:
         with:
           cmd: yq -i '.image.tag' 'argo/services/values/app.yaml'  ${{ steps.meta.outputs.tags }}
       - name: read file using yq
-        uses: mikefarah/yq@master
-        with:
-          cmd: yq  '.image.tag' 'argo/services/values/app.yaml'
+        run: |
+          cat argo/services/values/app.yaml
         
