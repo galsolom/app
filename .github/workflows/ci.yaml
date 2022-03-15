@@ -84,18 +84,27 @@ jobs:
   deploy:
       runs-on: ubuntu-latest
       steps:
+      - name: Extract metadata (tags, labels) for container image
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: galsolom/app
+          tags: | 
+            type=sha,format=long,prefix={{branch}}-
+
       - name: Checkout
         uses: actions/checkout@v3
         with:
           repository: galsolom/argo
           ref: test-template
+      
       - name: edit file using yq
         id: yamlUpdate
         uses: mikefarah/yq@master
         with:
           cmd: yq -i '.image.tag = "${{ steps.meta.outputs.tags }}"' argo/services/values/app.yaml
           
-      - name: read file using yq
+      - name: read file
         run: |
           cat argo/services/values/app.yaml
         
