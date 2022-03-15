@@ -100,12 +100,15 @@ jobs:
           ref: test-template
       
       - name: create var
+        id: version
         run: |
-          export appversion=$(echo ${{ steps.meta.outputs.tags }} | sed 's/.*://' -)
+           echo ::set-output name=appversion::$(echo ${{ steps.meta.outputs.tags }} | sed 's/.*://' -)
           
       - name: edit file using yq
         id: yamlUpdate
         uses: mikefarah/yq@master
+        env:
+          appversion: ${{ steps.version.outputs.appversion }}
         with:
           cmd: yq -i '.image.tag=strenv(appversion)' argo/services/values/app.yaml
           
