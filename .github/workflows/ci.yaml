@@ -83,6 +83,7 @@ jobs:
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
   deploy:
+      needs: build-container-image
       runs-on: ubuntu-latest
       steps:
       - name: Extract metadata (tags, labels) for container image
@@ -115,3 +116,14 @@ jobs:
       - name: read file
         run: |
           cat argo/services/values/app.yaml
+      - name: Commit files
+        run: |
+          git config --local user.email "actionbot@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git commit add argo/services/values/app.yaml
+          git commit -m "updated app version"
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.ARGO_GH_TOKEN }}
+          branch: test-template
