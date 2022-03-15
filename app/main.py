@@ -14,7 +14,7 @@ def read_root():
 def healthcheck():
     return "Healthy"
 
-tasks = {"msg": "error"}
+tasks = {"msg": "errorz"}
 
 @app.get("/error", status_code=500)
 def error_response(response: Response):
