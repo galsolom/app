@@ -82,7 +82,6 @@ jobs:
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
   deploy:
-      needs: build-container-image
       runs-on: ubuntu-latest
       steps:
       - name: Checkout
