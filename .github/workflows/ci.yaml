@@ -70,7 +70,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v3
       with:
-        images: $DOCKER_REGISTRTY/$APP_NAME
+        images: galsolom/app
         tags: | 
           type=sha,format=long,prefix={{branch}}-
 
@@ -96,7 +96,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: $DOCKER_REGISTRTY/$APP_NAME
+          images: galsolom/app
           tags: | 
             type=sha,format=long,prefix={{branch}}-
 
@@ -131,7 +131,7 @@ jobs:
           git config --local user.email "actionbot@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add $APPLICATION_PATH/$APP_NAME.yaml
-          git commit -m "updated $APPLICATION_PATH/$APP_NAME version: $APPVERSION"
+          git commit -m "updated $APPLICATION_PATH/$APP_NAME version: $APPVERSION "
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
