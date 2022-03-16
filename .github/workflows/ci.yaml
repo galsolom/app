@@ -10,6 +10,10 @@ on:
     branches: [ main ]
 env:
   APP_NAME: app
+  APPLICATION_PATH:  argo/services/values
+  ARGOCD_REPOSTIROY: galsolom/argo
+  DOCKER_REGISTRTY: galsolom
+  ARGOCD_BRANCH: main
 jobs:
   
   test:
@@ -66,7 +70,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v3
       with:
-        images: galsolom/app
+        images: $DOCKER_REGISTRTY/$APP_NAME
         tags: | 
           type=sha,format=long,prefix={{branch}}-
 
@@ -92,43 +96,45 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: galsolom/$APP_NAME
+          images: $DOCKER_REGISTRTY/$APP_NAME
           tags: | 
             type=sha,format=long,prefix={{branch}}-
 
-      - name: Checkout
+      - name: Checkout ArgoCD repository
         uses: actions/checkout@v3
         with:
-          repository: galsolom/argo
-          ref: main
+          repository: $ARGOCD_REPOSTIROY
+          ref: $ARGOCD_BRANCH
           persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
           fetch-depth: 0 # otherwise, there would be errors pushing refs to the destination repository.
       
-      - name: create var
+      - name: create application version variable
         id: version
         run: |
            echo ::set-output name=appversion::$(echo ${{ steps.meta.outputs.tags }} | sed 's/.*://' -)
           
-      - name: edit file using yq
+      - name: update helm cahrt values in argocd repo
         id: yamlUpdate
         uses: mikefarah/yq@master
         env:
           appversion: ${{ steps.version.outputs.appversion }}
         with:
-          cmd: yq -i '.image.tag=strenv(appversion)' argo/services/values/$APP_NAME.yaml
+          cmd: yq -i '.image.tag=strenv(appversion)' $APPLICATION_PATH/$APP_NAME.yaml
           
       - name: read file
         run: |
-          cat argo/services/values/$APP_NAME.yaml
+          cat $APPLICATION_PATH/$APP_NAME.yaml
       - name: Commit files
+        env:
+          APPVERSION: ${{ steps.version.outputs.appversion }}
         run: |
           git config --local user.email "actionbot@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add argo/services/values/$APP_NAME.yaml
-          git commit -m "updated app version"
+          git add $APPLICATION_PATH/$APP_NAME.yaml
+          git commit -m "updated $APPLICATION_PATH/$APP_NAME version: $APPVERSION"
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.ARGO_GH_TOKEN }}
-          branch: main
-          repository: galsolom/argo
+          branch: $ARGOCD_BRANCH
+          repository: $ARGOCD_REPOSTIROY
