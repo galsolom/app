@@ -12,7 +12,6 @@ env:
   APP_NAME: app
   APPLICATION_PATH:  argo/services/values
   ARGOCD_REPOSTIROY: galsolom/argo
-  DOCKER_REGISTRTY: galsolom
   ARGOCD_BRANCH: main
 jobs:
   
