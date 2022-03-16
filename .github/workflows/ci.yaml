@@ -11,8 +11,6 @@ on:
 env:
   APP_NAME: app
   APPLICATION_PATH:  argo/services/values
-  ARGOCD_REPOSTIROY: galsolom/argo
-  ARGOCD_BRANCH: main
 jobs:
   
   test:
@@ -102,8 +100,8 @@ jobs:
       - name: Checkout ArgoCD repository
         uses: actions/checkout@v3
         with:
-          repository: $ARGOCD_REPOSTIROY
-          ref: $ARGOCD_BRANCH
+          repository: galsolom/argo
+          ref: main
           persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
           fetch-depth: 0 # otherwise, there would be errors pushing refs to the destination repository.
       
@@ -112,7 +110,7 @@ jobs:
         run: |
            echo ::set-output name=appversion::$(echo ${{ steps.meta.outputs.tags }} | sed 's/.*://' -)
           
-      - name: update helm cahrt values in argocd repo
+      - name: update helm chart values in argocd repo
         id: yamlUpdate
         uses: mikefarah/yq@master
         env:
@@ -135,5 +133,5 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.ARGO_GH_TOKEN }}
-          branch: $ARGOCD_BRANCH
-          repository: $ARGOCD_REPOSTIROY
+          branch: main
+          repository: galsolom/argo
