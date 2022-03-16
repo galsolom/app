@@ -8,7 +8,8 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-
+env:
+  APP_NAME: app
 jobs:
   
   test:
@@ -83,7 +84,7 @@ jobs:
       run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-  deploy:
+  update-argocd-repo:
       needs: build-container-image
       runs-on: ubuntu-latest
       steps:
@@ -91,7 +92,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: galsolom/app
+          images: galsolom/$APP_NAME
           tags: | 
             type=sha,format=long,prefix={{branch}}-
 
@@ -99,7 +100,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: galsolom/argo
-          ref: test-template
+          ref: main
           persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
           fetch-depth: 0 # otherwise, there would be errors pushing refs to the destination repository.
       
@@ -114,20 +115,20 @@ jobs:
         env:
           appversion: ${{ steps.version.outputs.appversion }}
         with:
-          cmd: yq -i '.image.tag=strenv(appversion)' argo/services/values/app.yaml
+          cmd: yq -i '.image.tag=strenv(appversion)' argo/services/values/$APP_NAME.yaml
           
       - name: read file
         run: |
-          cat argo/services/values/app.yaml
+          cat argo/services/values/$APP_NAME.yaml
       - name: Commit files
         run: |
           git config --local user.email "actionbot@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add argo/services/values/app.yaml
+          git add argo/services/values/$APP_NAME.yaml
           git commit -m "updated app version"
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.ARGO_GH_TOKEN }}
-          branch: test-template
+          branch: main
           repository: galsolom/argo
